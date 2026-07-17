@@ -1,0 +1,114 @@
+{
+    "flats": [
+        {
+            "id": 101,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 102,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 103,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 104,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 201,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 202,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 203,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 204,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 301,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 302,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 303,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 304,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 401,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 402,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 403,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 404,
+            "status": "unknown",
+            "paid": false
+        },
+        {
+            "id": 501,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 502,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 503,
+            "status": "agreed",
+            "paid": false
+        },
+        {
+            "id": 504,
+            "status": "agreed",
+            "paid": false
+        }
+    ],
+    "issues": [
+
+    ],
+    "expenses": [
+        {
+            "label": "الصندوق",
+            "amount": 0
+        }
+    ],
+    "lastUpdated": "٣ يوليو ٢٠٢٦ في ٠٤:٣٤ م"
+}

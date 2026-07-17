@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رسالة واتساب - إدارة المبنى</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: #ECE5DD;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.container {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+.header {
+  background: #075E54;
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header .icon {
+  width: 40px; height: 40px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.header h1 { font-size: 16px; font-weight: 600; }
+.header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+
+.body { padding: 20px; }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 500; margin-bottom: 16px;
+}
+.status-active { background: #d4edda; color: #155724; }
+.status-inactive { background: #f8d7da; color: #721c24; }
+.status-loading { background: #cce5ff; color: #004085; }
+
+.msg-box {
+  background: #DCF8C6;
+  border-radius: 8px 8px 0 8px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #111;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid #c3e6a0;
+  min-height: 80px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.msg-box::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: -8px;
+  width: 0; height: 0;
+  border-left: 8px solid #DCF8C6;
+  border-bottom: 8px solid transparent;
+}
+
+.stats {
+  display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.stat {
+  flex: 1; min-width: 80px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+.stat .num { font-size: 22px; font-weight: 700; color: #075E54; }
+.stat .lbl { font-size: 10px; color: #6c757d; margin-top: 2px; }
+
+.btn {
+  display: block; width: 100%;
+  padding: 14px;
+  border: none; border-radius: 8px;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.btn-send {
+  background: #25D366;
+  color: #fff;
+}
+.btn-send:hover { background: #1da851; }
+.btn-send:active { transform: scale(0.98); }
+.btn-copy {
+  background: #f8f9fa;
+  color: #075E54;
+  border: 1px solid #075E54;
+}
+.btn-copy:hover { background: #e8f5e9; }
+
+.footer {
+  background: #f8f9fa;
+  padding: 10px 20px;
+  font-size: 11px;
+  color: #6c757d;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+}
+
+.no-unpaid {
+  text-align: center;
+  padding: 30px 20px;
+  color: #28a745;
+}
+.no-unpaid .check { font-size: 48px; }
+.no-unpaid p { font-size: 14px; margin-top: 8px; font-weight: 500; }
+
+.error-box {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  color: #856404;
+  margin-bottom: 12px;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="icon">🏢</div>
+    <div>
+      <h1>تذكير دفع الخدمات</h1>
+      <p id="dateInfo">جاري التحقق من التاريخ...</p>
+    </div>
+  </div>
+
+  <div class="body">
+    <div id="statusBadge" class="status-badge status-loading">⏳ جاري تحميل البيانات...</div>
+    <div class="error-box" id="errorBox"></div>
+    <div id="mainContent"></div>
+  </div>
+
+  <div class="footer" id="footer">آخر تحديث: جاري التحميل...</div>
+</div>
+
+<script>
+const GH_OWNER = "abdo78-max"; 
+const GH_REPO  = "building"; 
+const GH_PATH  = "web/WEB-INF/building.json";     
+// رقم المجموعة على واتساب - عدّل هنا برقم المجموعة
+// لو مجموعة: استخدم الـ Group Invite Link أو رقم الجروب
+// لو رقم فردي: مثلاً 201507085053 (بدون +)
+const WHATSAPP_GROUP = "HPjLofjRdNc5pkvkjeAdI4"; // كود المجموعة
+
+function getTodayInfo() {
+  const now = new Date();
+  return {
+    day: now.getDate(),
+    month: now.getMonth() + 1,
+    year: now.getFullYear(),
+    monthName: now.toLocaleDateString('ar-EG', { month: 'long' }),
+    fullDate: now.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+  };
+}
+
+function isReminderPeriod(day) {
+  return day >= 1 && day <= 28;
+}
+
+async function loadData() {
+  const info = getTodayInfo();
+  document.getElementById('dateInfo').textContent = info.fullDate;
+
+  if (!isReminderPeriod(info.day)) {
+    document.getElementById('statusBadge').className = 'status-badge status-inactive';
+    document.getElementById('statusBadge').textContent = `⏸ التذكير يبدأ من 1 إلى 28 من كل شهر`;
+    document.getElementById('mainContent').innerHTML = `
+      <div class="no-unpaid">
+        <div class="check">📅</div>
+        <p>اليوم ${info.day} من الشهر — خارج فترة التذكير</p>
+        <p style="font-size:12px;color:#6c757d;margin-top:6px">التذكير يبدأ من أول الشهر</p>
+      </div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?t=${Date.now()}`);
+    if (!res.ok) throw new Error('فشل تحميل البيانات');
+    const data = await res.json();
+
+    const unpaid = data.flats.filter(f => f.status === 'agreed' && !f.paid);
+    const paid   = data.flats.filter(f => f.paid).length;
+    const total  = data.flats.filter(f => f.status === 'agreed').length;
+
+    if (data.lastUpdated) {
+      document.getElementById('footer').textContent = 'آخر تحديث: ' + data.lastUpdated;
+    }
+
+    if (unpaid.length === 0) {
+      document.getElementById('statusBadge').className = 'status-badge status-active';
+      document.getElementById('statusBadge').textContent = '✅ الكل دفع الشهر ده!';
+      document.getElementById('mainContent').innerHTML = `
+        <div class="no-unpaid">
+          <div class="check">🎉</div>
+          <p>ما شاء الله! كل السكان دفعوا خدمات شهر ${info.monthName}</p>
+        </div>`;
+      return;
+    }
+
+    const flatsList = unpaid.map(f => `• شقة رقم ${f.id}`).join('\n');
+    const msg = `السلام عليكم ورحمة الله وبركاته 🏢
+
+تذكير بخدمات المبنى — شهر ${info.monthName} ${info.year}
+
+الشقق التالية لم تسدد حصة الخدمات حتى الآن:
+
+${flatsList}
+
+نرجو منكم السداد في أقرب وقت ممكن حتى نتمكن من الاستمرار في تقديم أفضل خدمة للمبنى وصيانته. 🙏
+
+شكراً لتعاونكم 💚`;
+
+    document.getElementById('statusBadge').className = 'status-badge status-active';
+    document.getElementById('statusBadge').textContent = `📅 اليوم ${info.day} من ${info.monthName} — ${unpaid.length} شقة لم تدفع`;
+
+    const waUrl = `https://api.whatsapp.com/send/?invite=${WHATSAPP_GROUP}&text=${encodeURIComponent(msg)}`;
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="stats">
+        <div class="stat"><div class="num">${unpaid.length}</div><div class="lbl">لم يدفعوا</div></div>
+        <div class="stat"><div class="num">${paid}</div><div class="lbl">دفعوا</div></div>
+        <div class="stat"><div class="num">${total}</div><div class="lbl">إجمالي السكان</div></div>
+      </div>
+      <div class="msg-box" id="msgText">${msg}</div>
+      <a class="btn btn-send" href="${waUrl}" target="_blank">📤 فتح واتساب وإرسال</a>
+      <button class="btn btn-copy" onclick="copyMsg()">📋 نسخ الرسالة فقط</button>
+    `;
+
+    window._currentMsg = msg;
+
+  } catch(e) {
+    document.getElementById('statusBadge').className = 'status-badge status-inactive';
+    document.getElementById('statusBadge').textContent = '❌ خطأ في التحميل';
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('errorBox').textContent = 'تعذّر تحميل البيانات: ' + e.message;
+  }
+}
+
+function copyMsg() {
+  if (!window._currentMsg) return;
+  navigator.clipboard.writeText(window._currentMsg).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = '✅ تم النسخ!';
+    setTimeout(() => btn.textContent = '📋 نسخ الرسالة فقط', 2000);
+  });
+}
+
+loadData();
+</script>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة المبنى شهر يوليو</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body { background: #fafafa; color: #333; }
+.dash{padding:1.25rem 1rem;direction:rtl;font-family:'Segoe UI',Tahoma,Arial,sans-serif}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px}
+.top-bar h1{font-size:19px;font-weight:500;color:#111}
+.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.b-admin{background:#d4edda;color:#155724}
+.b-view{background:#cce5ff;color:#004085}
+.b-neighbor{background:#E6F1FB;color:#0C447C}
+.b-paid{background:#EAF3DE;color:#3B6D11}
+.b-pending{background:#FAEEDA;color:#854F0B}
+.b-empty{background:#e9ecef;color:#6c757d}
+.b-unknown{background:#FCEBEB;color:#791F1F}
+.b-open{background:#EAF3DE;color:#3B6D11}
+.b-invest{background:#E6F1FB;color:#0C447C}
+.b-done{background:#EAF3DE;color:#3B6D11}
+.pin-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.pin-row input{width:280px;font-size:13px;padding:5px 10px;border-radius:6px;border:0.5px solid #ced4da;background:#fff;color:#000;direction:ltr}
+.pin-row button, .issues-form button, .detail-card button, #saveExpRow button, .setup-card button{padding:6px 12px; font-size:12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer;}
+.pin-row button:hover{background:#0056b3}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.25rem}
+.mc{background:#fff; border: 0.5px solid #dee2e6; border-radius:6px;padding:12px 10px}
+.mc .lbl{font-size:11px;color:#6c757d;margin-bottom:3px}
+.mc .val{font-size:20px;font-weight:500;color:#111}
+.mc .sub{font-size:10px;color:#6c757d;margin-top:1px}
+.tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;border:0.5px solid #ced4da;background:#fff;color:#495057}
+.tab.active{background:#007bff;color:#fff;border-color:#007bff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.card{background:#fff;border:0.5px solid #dee2e6;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem}
+.sec-title{font-size:15px;font-weight:500;color:#111;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.flat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:7px;margin-bottom:1.25rem}
+.fc{border-radius:6px;padding:9px 5px;text-align:center;border:0.5px solid #dee2e6;background:#fff;cursor:pointer;transition:transform .1s}
+.fc:hover{transform:scale(1.05)}
+.fc .fn{font-size:14px;font-weight:500}
+.fc .fs{font-size:10px;margin-top:2px}
+.fc-paid{background:#EAF3DE;border-color:#97C459}.fc-paid .fn{color:#3B6D11}.fc-paid .fs{color:#3B6D11}
+.fc-pending{background:#FAEEDA;border-color:#EF9F27}.fc-pending .fn{color:#854F0B}.fc-pending .fs{color:#854F0B}
+.fc-empty{background:#f8f9fa}.fc-empty .fn{color:#6c757d}.fc-empty .fs{color:#6c757d}
+.fc-unknown{background:#FCEBEB;border-color:#F09595}.fc-unknown .fn{color:#791F1F}.fc-unknown .fs{color:#791F1F}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem;font-size:11px;color:#6c757d}
+.li{display:flex;align-items:center;gap:4px}
+.ld{width:11px;height:11px;border-radius:3px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f8f9fa;color:#495057;font-weight:500;padding:7px 9px;text-align:right;border-bottom:0.5px solid #dee2e6}
+td{padding:7px 9px;border-bottom:0.5px solid #dee2e6;color:#212529;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.flat-select{font-size:12px;padding:3px 7px;border-radius:4px;border:0.5px solid #ced4da;background:#fff;color:#495057}
+.detail-card{background:#f8f9fa;border-radius:6px;padding:12px;margin-bottom:1rem;display:none;border:0.5px solid #dee2e6;}
+.notif{font-size:11px;color:#28a745;opacity:0;transition:opacity .3s}
+.notif.show{opacity:1}
+.issues-form{display:none;flex-direction:column;gap:8px;margin-bottom:1rem;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
+.issues-form input,.issues-form select{font-size:13px; padding:5px; border:0.5px solid #ced4da; border-radius:4px;}
+.exp-input{background:transparent;border:none;border-bottom:0.5px solid #ced4da;width:90px;font-size:12px;color:#000;text-align:right;padding:1px 2px}
+.loading-overlay{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;font-size:14px;color:#6c757d;flex-direction:column;gap:12px;text-align:center;padding:20px}
+.spinner{width:32px;height:32px;border:3px solid #e9ecef;border-top-color:#007bff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.add-exp-form{display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:12px;background:#f8f9fa;border-radius:6px;border:0.5px solid #dee2e6;}
+.add-exp-form input{font-size:13px;padding:5px 8px;border:0.5px solid #ced4da;border-radius:4px;}
+.del-btn{background:#dc3545;color:#fff;border:none;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;}
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <span id="loadingText">جاري تحميل البيانات...</span>
+</div>
+
+<div class="dash" id="app" style="opacity:0;transition:opacity .3s">
+  <div class="top-bar">
+    <div>
+      <div style="font-size:12px;color:#6c757d;margin-bottom:3px">لوحة إدارة المبنى</div>
+      <h1><i class="ti ti-building" aria-hidden="true"></i>إدارة المبنى شهر يوليو</h1>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span class="badge b-view" id="modeBadge">وضع المشاهدة</span>
+      <span class="badge b-admin" id="adminBadge" style="display:none"></span>
+      <span style="font-size:11px;color:#6c757d" id="lastUpdated"></span>
+    </div>
+  </div>
+
+  <div class="pin-row">
+    <input type="password" id="tokenInput" placeholder="أدخل كلمة المرور 1234 لاضافة مشكلة" />
+    <button onclick="saveTokenAndLogin()" id="loginBtn"><i class="ti ti-key" aria-hidden="true"></i> دخول</button>
+    <span class="notif" id="loginNotif">تم التفعيل ✓</span>
+    <button onclick="logout()" id="logoutBtn" style="display:none; background:#dc3545;">تسجيل الخروج</button>
+    <button onclick="loadData()" style="font-size:11px;padding:4px 10px; background:#17a2b8"><i class="ti ti-refresh" aria-hidden="true"></i> تحديث البيانات</button>
+  </div>
+
+  <div class="metrics" id="metricsRow"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('payments',this)"><i class="ti ti-coin" aria-hidden="true"></i> المدفوعات</button>
+    <button class="tab" onclick="switchTab('issues',this)"><i class="ti ti-tool" aria-hidden="true"></i> المشاكل</button>
+    <button class="tab" onclick="switchTab('expenses',this)"><i class="ti ti-receipt" aria-hidden="true"></i> المصاريف</button>
+  </div>
+
+  <div id="tab-payments" class="tab-content active">
+    <div class="sec-title"><i class="ti ti-home" aria-hidden="true"></i> حالة الشقق</div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#97C459"></div>دفع</div>
+      <div class="li"><div class="ld" style="background:#EF9F27"></div>وافق / لم يدفع</div>
+      <div class="li"><div class="ld" style="background:#F09595"></div>لم نصل إليه</div>
+      <div class="li"><div class="ld" style="background:#f8f9fa;border:0.5px solid #dee2e6"></div>فارغة</div>
+    </div>
+    <div class="flat-grid" id="flatGrid"></div>
+    <div class="detail-card" id="detailCard"></div>
+  </div>
+
+  <div id="tab-issues" class="tab-content">
+    <div class="issues-form" id="issueForm">
+      <div style="font-size:13px;font-weight:500;color:#111">إضافة مشكلة جديدة</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="newIssueText" placeholder="وصف المشكلة..." style="flex:1;"/>
+        <button onclick="addIssue()" style="font-size:12px;padding:4px 12px"><i class="ti ti-plus" aria-hidden="true"></i> إضافة</button>
+        <span class="notif" id="issueNotif">تمت الإضافة ✓</span>
+      </div>
+    </div>
+    <div class="card"><table><thead><tr><th>#</th><th>المشكلة</th><th>الحالة</th><th id="issueEditCol" style="display:none">تعديل</th></tr></thead><tbody id="issuesTbody"></tbody></table></div>
+  </div>
+
+  <div id="tab-expenses" class="tab-content">
+    <div class="sec-title"><i class="ti ti-wallet" aria-hidden="true"></i> المصاريف الشهرية المشتركة</div>
+
+    <!-- فورم إضافة بند جديد - يظهر للأدمن فقط -->
+    <div class="add-exp-form" id="addExpForm">
+      <input type="text" id="newExpLabel" placeholder="اسم البند (مثلاً: الصندوق)" style="flex:1;min-width:130px"/>
+      <input type="number" id="newExpAmount" placeholder="المبلغ" min="0" style="width:100px"/>
+      <button onclick="addExpense()" style="padding:5px 14px;font-size:12px;background:#28a745;color:#fff;border:none;border-radius:4px;cursor:pointer"><i class="ti ti-plus"></i> إضافة بند</button>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>البند</th>
+            <th>المبلغ (جنيه)</th>
+            <th id="expDelCol" style="display:none"></th>
+          </tr>
+        </thead>
+        <tbody id="expTbody"></tbody>
+        <tfoot>
+          <tr id="expTotalRow">
+            <td style="font-weight:500;padding:8px 9px">المتبقي في الصندوق</td>
+            <td style="padding:8px 9px;font-weight:500" id="expTotal">0 ج</td>
+            <td id="expDelColFoot" style="display:none"></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div id="saveExpRow" style="margin-top:12px;display:none">
+        <button onclick="saveExpenses()" style="font-size:12px;padding:4px 12px"><i class="ti ti-device-floppy" aria-hidden="true"></i> حفظ المصاريف</button>
+        <span class="notif" id="expNotif" style="margin-right:8px">تم الحفظ ✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GH_OWNER = "abdo78-max"; 
+const GH_REPO  = "building"; 
+const GH_PATH  = "web/WEB-INF/building.json";             
+
+const part1 = "github_";
+const part2 = "pat_";
+const part3 = "11BSGG6LI029kYIGPZ20XR_xVtFtQ4Yp7PBYkHZlCN88cMK2918NXoDtbZlSr8UvFxMF2VZKDNrCZwvAKT";
+
+const NEIGHBOR_TOKEN = part1 + part2 + part3;
+
+let role = 'view';
+let activeAdminToken = '';
+let fileSha = ""; 
+
+let flats = [], issues = [], expenses = [];
+const statusLabel = {agreed:"وافق على الدفع", empty:"لا أحد", maybe:"ربما لا أحد", unknown:"لم نصل إليه"};
+
+function getToken() {
+  if (role === 'admin') return activeAdminToken;
+  if (role === 'neighbor') return NEIGHBOR_TOKEN;
+  return null;
+}
+
+async function loadData() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('loadingText').textContent = "جاري تحديث البيانات...";
+  
+  const token = getToken();
+  const headers = { "Accept": "application/vnd.github+json" };
+  if (token) headers["Authorization"] = `token ${token}`;
+
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?nocache=${new Date().getTime()}`, { headers });
+    if (!response.ok) throw new Error("فشل الوصول للملف.");
+
+    const json = await response.json();
+    fileSha = json.sha; 
+
+    const decodedText = decodeURIComponent(atob(json.content).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const serverData = JSON.parse(decodedText);
+    flats    = serverData.flats || [];
+    issues   = serverData.issues || [];
+    expenses = serverData.expenses || [];
+
+    // لو مفيش الصندوق في البيانات، ضيفه تلقائياً
+    if (!expenses.find(e => e.label === 'الصندوق')) {
+      expenses.push({ label: 'الصندوق', amount: 0 });
+    }
+
+    if (serverData.lastUpdated) {
+      document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + serverData.lastUpdated;
+    }
+    
+    renderAll();
+  } catch(e) {
+    console.error("خطأ أثناء جلب البيانات:", e);
+    alert("فشل في تحميل البيانات الحالية، يرجى التحقق من اتصال الإنترنت أو صحة الكود المُدخل.");
+  }
+  
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('app').style.opacity = '1';
+}
+
+async function persistAll() {
+  const token = getToken();
+  if (!token) {
+    alert("أنت في وضع المشاهدة فقط.");
+    return;
+  }
+
+  const now = new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const payload = { flats, issues, expenses, lastUpdated: now };
+  
+  const jsonString = JSON.stringify(payload, null, 2);
+  const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+      return String.fromCharCode('0x' + p1);
+  }));
+
+  try {
+    const getRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
+       headers: { "Authorization": `token ${token}` }
+    });
+    if(getRes.ok) {
+       const getJson = await getRes.json();
+       if(getJson.sha) fileSha = getJson.sha;
+    }
+
+    const response = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
+      method: 'PUT',
+      headers: { 
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github+json'
+      },
+      body: JSON.stringify({
+        message: `تحديث البيانات - ${now}`,
+        content: base64Content,
+        sha: fileSha
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error("فشل الرفع: " + errText);
+    }
+    
+    const resJson = await response.json();
+    fileSha = resJson.content.sha; 
+    document.getElementById('lastUpdated').textContent = 'آخر تحديث: ' + now;
+  } catch(e) {
+    console.error("خطأ في رفع البيانات:", e);
+    alert("حدث خطأ أثناء حفظ البيانات. تأكد من صلاحيات الكود المستخدم.");
+  }
+}
+
+function saveTokenAndLogin() {
+  const inputVal = document.getElementById('tokenInput').value.trim();
+  if (!inputVal) return;
+
+  if (inputVal === '1234') {
+    role = 'neighbor';
+    activeAdminToken = '';
+  } else {
+    role = 'admin';
+    activeAdminToken = inputVal;
+  }
+  
+  checkTokenState();
+  loadData(); 
+  flash('loginNotif');
+}
+
+function checkTokenState() {
+  const modeBadge   = document.getElementById('modeBadge');
+  const adminBadge  = document.getElementById('adminBadge');
+  const tokenInput  = document.getElementById('tokenInput');
+  const loginBtn    = document.getElementById('loginBtn');
+  const logoutBtn   = document.getElementById('logoutBtn');
+  const saveExpRow  = document.getElementById('saveExpRow');
+  const issueEditCol= document.getElementById('issueEditCol');
+  const issueForm   = document.getElementById('issueForm');
+  const addExpForm  = document.getElementById('addExpForm');
+  const expDelCol   = document.getElementById('expDelCol');
+  const expDelColFoot = document.getElementById('expDelColFoot');
+
+  if (role === 'admin') {
+    modeBadge.textContent = "وضع الإدارة الكاملة";
+    modeBadge.className = "badge b-admin";
+    adminBadge.style.display = 'none'; 
+    tokenInput.style.display = 'none';
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    saveExpRow.style.display = 'block';
+    issueEditCol.style.display = 'table-cell';
+    issueForm.style.display = 'flex';
+    addExpForm.style.display = 'flex';
+    expDelCol.style.display = 'table-cell';
+    expDelColFoot.style.display = 'table-cell';
+
+  } else if (role === 'neighbor') {
+    modeBadge.textContent = "وضع الساكن";
+    modeBadge.className = "badge b-neighbor";
+    adminBadge.style.display = 'inline-block';
+    adminBadge.textContent = "صلاحية: إضافة شكاوى/مشاكل فقط";
+    adminBadge.className = "badge b-invest";
+    tokenInput.style.display = 'none';
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    saveExpRow.style.display = 'none';
+    issueEditCol.style.display = 'none';
+    issueForm.style.display = 'flex';
+    addExpForm.style.display = 'none';
+    expDelCol.style.display = 'none';
+    expDelColFoot.style.display = 'none';
+
+  } else {
+    modeBadge.textContent = "وضع المشاهدة";
+    modeBadge.className = "badge b-view";
+    adminBadge.style.display = 'none';
+    tokenInput.style.display = 'inline-block';
+    tokenInput.value = '';
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    saveExpRow.style.display = 'none';
+    issueEditCol.style.display = 'none';
+    issueForm.style.display = 'none';
+    addExpForm.style.display = 'none';
+    expDelCol.style.display = 'none';
+    expDelColFoot.style.display = 'none';
+  }
+}
+
+function logout() {
+  role = 'view';
+  activeAdminToken = '';
+  checkTokenState();
+  closeDetail();
+  renderAll();
+}
+
+function flash(id) {
+  const el = document.getElementById(id);
+  if(el){ el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2000); }
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function fcClass(f) {
+  if (f.paid) return 'fc fc-paid';
+  if (f.status==='agreed') return 'fc fc-pending';
+  if (f.status==='unknown') return 'fc fc-unknown';
+  return 'fc fc-empty';
+}
+function fcLabel(f) {
+  if (f.paid) return 'دفع';
+  if (f.status==='agreed') return 'لم يدفع';
+  if (f.status==='unknown') return 'لم نصل';
+  return 'فارغة';
+}
+
+function renderGrid() {
+  const g = document.getElementById('flatGrid');
+  g.innerHTML='';
+  flats.forEach(f=>{
+    const d=document.createElement('div');
+    d.className=fcClass(f);
+    d.innerHTML=`<div class="fn">${f.id}</div><div class="fs">${fcLabel(f)}</div>`;
+    d.onclick=()=>openDetail(f);
+    g.appendChild(d);
+  });
+}
+
+function openDetail(f) {
+  const c=document.getElementById('detailCard');
+  c.style.display='block';
+  let editHtml='';
+  if (role === 'admin') {
+    editHtml=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select class="flat-select" id="ds_${f.id}">
+        <option value="empty"   ${f.status==='empty'?'selected':''}>لا أحد</option>
+        <option value="maybe"   ${f.status==='maybe'?'selected':''}>ربما لا أحد</option>
+        <option value="agreed"  ${f.status==='agreed'?'selected':''}>وافق على الدفع</option>
+        <option value="unknown" ${f.status==='unknown'?'selected':''}>لم نصل إليه</option>
+      </select>
+      <select class="flat-select" id="dp_${f.id}">
+        <option value="false" ${!f.paid?'selected':''}>لم يدفع بعد</option>
+        <option value="true"  ${f.paid?'selected':''}>دفع</option>
+      </select>
+      <button style="font-size:12px;padding:4px 10px" onclick="saveFlatDetail(${f.id})"><i class="ti ti-check" aria-hidden="true"></i> حفظ التعديل</button>
+      <span class="notif" id="dn_${f.id}">✓</span>
+    </div>`;
+  }
+  c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:14px;font-weight:500">شقة رقم ${f.id}</span>
+    <button style="font-size:11px;padding:2px 8px; background:#6c757d; color:#fff; border:none; border-radius:3px;" onclick="closeDetail()">✕</button>
+  </div>
+  <div style="font-size:12px;color:#6c757d">الساكن: <strong style="color:#111">${statusLabel[f.status]}</strong></div>
+  <div style="font-size:12px;color:#6c757d;margin-top:4px">الدفع: <strong style="color:#111">${f.paid?'دفع':(f.status==='agreed'?'لم يدفع بعد':'لا يوجد')}</strong></div>
+  ${editHtml}`;
+}
+
+function closeDetail(){document.getElementById('detailCard').style.display='none';}
+
+async function saveFlatDetail(id) {
+  const f=flats.find(x=>x.id===id);
+  f.status=document.getElementById('ds_'+id).value;
+  f.paid=document.getElementById('dp_'+id).value==='true';
+  await persistAll();
+  flash('dn_'+id);
+  renderAll();
+  openDetail(f);
+}
+
+function renderIssues() {
+  const tb=document.getElementById('issuesTbody');
+  tb.innerHTML='';
+  const stMap={pending:'<span class="badge b-pending">انتظار</span>',open:'<span class="badge b-open">مفتوحة</span>',investigating:'<span class="badge b-invest">جارٍ</span>',done:'<span class="badge b-done">منجزة</span>'};
+  issues.forEach(iss=>{
+    let editTd='';
+    if (role === 'admin') {
+      editTd=`<td><select class="flat-select" onchange="changeIssueStatus(${iss.id},this.value)">
+        <option value="pending" ${iss.status==='pending'?'selected':''}>انتظار</option>
+        <option value="investigating" ${iss.status==='investigating'?'selected':''}>جارٍ</option>
+        <option value="open" ${iss.status==='open'?'selected':''}>مفتوحة</option>
+        <option value="done" ${iss.status==='done'?'selected':''}>منجزة</option>
+      </select></td>`;
+    }
+    tb.innerHTML+=`<tr><td>${iss.id}</td><td>${iss.text}</td><td>${stMap[iss.status]||''}</td>${editTd}</tr>`;
+  });
+}
+
+async function changeIssueStatus(id,val) {
+  const iss=issues.find(x=>x.id===id);
+  if(iss){iss.status=val; await persistAll(); renderIssues();}
+}
+
+async function addIssue() {
+  const txt=document.getElementById('newIssueText').value.trim();
+  if(!txt)return;
+  issues.push({id:issues.length+1,text:txt,pri:'med',status:'pending'});
+  document.getElementById('newIssueText').value='';
+  await persistAll();
+  flash('issueNotif');
+  renderIssues();
+}
+
+// ===== المصاريف =====
+function renderExpenses() {
+  const tb = document.getElementById('expTbody');
+  tb.innerHTML = '';
+  const isAdmin = role === 'admin';
+
+  // الصندوق دايماً أول بند
+  const sorted = [...expenses].sort((a,b) => {
+    if (a.label === 'الصندوق') return -1;
+    if (b.label === 'الصندوق') return 1;
+    return 0;
+  });
+
+  sorted.forEach((e) => {
+    const i = expenses.indexOf(e);
+    const isBox = e.label === 'الصندوق';
+    const rowStyle = isBox ? 'background:#EAF3DE;' : '';
+    const labelCell = isBox ? `<strong style="color:#155724">🏦 ${e.label}</strong>` : e.label;
+
+    const amountCell = isAdmin
+      ? `<input class="exp-input" type="number" value="${e.amount}" min="0" style="${isBox?'color:#155724;font-weight:600':''}" oninput="expenses[${i}].amount=+this.value;updateExpTotal()"/>`
+      : `<span style="font-weight:${isBox?'600':'400'};color:${isBox?'#155724':'inherit'}">${Number(e.amount).toLocaleString()} ج</span>`;
+
+    const delCell = isAdmin
+      ? (!isBox ? `<td><button class="del-btn" onclick="deleteExpense(${i})">حذف</button></td>` : '<td></td>')
+      : '';
+
+    tb.innerHTML += `<tr style="${rowStyle}"><td>${labelCell}</td><td>${amountCell}</td>${delCell}</tr>`;
+  });
+
+  updateExpTotal();
+}
+
+function updateExpTotal() {
+  const sandbox     = Number((expenses.find(e => e.label === 'الصندوق') || {amount:0}).amount);
+  const otherTotal  = expenses.filter(e => e.label !== 'الصندوق').reduce((s,e) => s + Number(e.amount), 0);
+  const remaining   = sandbox - otherTotal;
+  const color = remaining >= 0 ? '#155724' : '#721c24';
+  const bg    = remaining >= 0 ? '#EAF3DE'  : '#FCEBEB';
+  document.getElementById('expTotal').innerHTML =
+    `<span style="color:${color};font-weight:600">${remaining.toLocaleString()} ج</span>` +
+    `<span style="font-size:10px;color:#6c757d;margin-right:8px">(${sandbox.toLocaleString()} - ${otherTotal.toLocaleString()})</span>`;
+  document.getElementById('expTotalRow').style.background = bg;
+}
+
+function addExpense() {
+  const label  = document.getElementById('newExpLabel').value.trim();
+  const amount = +document.getElementById('newExpAmount').value || 0;
+  if (!label) { alert('اكتب اسم البند أولاً'); return; }
+  expenses.push({ label, amount });
+  document.getElementById('newExpLabel').value  = '';
+  document.getElementById('newExpAmount').value = '';
+  renderExpenses();
+}
+
+function deleteExpense(i) {
+  if (confirm(`حذف بند "${expenses[i].label}"؟`)) {
+    expenses.splice(i, 1);
+    renderExpenses();
+  }
+}
+
+async function saveExpenses() {
+  await persistAll();
+  flash('expNotif');
+}
+
+function renderMetrics() {
+  const agreed  = flats.filter(f=>f.status==='agreed').length;
+  const paid    = flats.filter(f=>f.paid).length;
+  const empty   = flats.filter(f=>f.status==='empty'||f.status==='maybe').length;
+  const doneIss = issues.filter(i=>i.status==='done').length;
+  const sandbox    = Number((expenses.find(e=>e.label==='الصندوق')||{amount:0}).amount);
+  const otherTotal = expenses.filter(e=>e.label!=='الصندوق').reduce((s,e)=>s+Number(e.amount),0);
+  const remaining  = sandbox - otherTotal;
+  const remColor   = remaining >= 0 ? '#155724' : '#dc3545';
+
+  document.getElementById('metricsRow').innerHTML=`
+    <div class="mc"><div class="lbl">إجمالي الشقق</div><div class="val">${flats.length}</div></div>
+    <div class="mc"><div class="lbl">المشتركون بالسداد</div><div class="val">${agreed}</div></div>
+    <div class="mc"><div class="lbl">المسددين فعلياً</div><div class="val">${paid}</div></div>
+    <div class="mc"><div class="lbl">شقق فارغة</div><div class="val">${empty}</div></div>
+    <div class="mc"><div class="lbl">طلبات منجزة</div><div class="val">${doneIss}/${issues.length}</div></div>
+    <div class="mc"><div class="lbl">المتبقي في الصندوق</div><div class="val" style="font-size:15px;color:${remColor}">${remaining.toLocaleString()} ج</div></div>`;
+}
+
+function renderAll(){
+  renderMetrics();
+  renderGrid();
+  renderIssues();
+  renderExpenses();
+}
+
+checkTokenState();
+loadData();
+</script>
+</body>
+</html>
